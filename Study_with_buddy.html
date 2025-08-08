@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study with Buddy - Raksha Bandhan Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #2D0320; /* Deep maroon/purple */
+            color: #e5e5e5;
+        }
+        .main-container {
+            background: radial-gradient(circle at 100% 0%, rgba(255, 165, 0, 0.15), rgba(255, 165, 0, 0) 50%), /* Saffron/Orange glow */
+                        radial-gradient(circle at 0% 100%, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0) 50%), /* Gold glow */
+                        #2D0320;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 215, 0, 0.2); /* Gold border */
+        }
+        .btn-primary {
+            background: linear-gradient(90deg, #FF7722, #FFA500, #FFD700); /* Saffron to Gold gradient */
+            background-size: 200% 200%;
+            animation: gradient-animation 5s ease infinite;
+            transition: all 0.3s ease;
+            color: #2D0320; /* Dark text for contrast */
+        }
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+        @keyframes gradient-animation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .loader {
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-left-color: #FFA500; /* Saffron loader */
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .result-section {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .result-section.visible {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .file-upload-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        .file-upload-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .file-upload-label {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="main-container min-h-screen flex items-center justify-center p-4">
+
+    <main class="w-full max-w-4xl mx-auto space-y-8">
+        <header class="text-center space-y-4">
+            <div class="inline-block p-3 bg-white/10 rounded-full">
+                <svg class="w-20 h-20" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="mascot-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#FFA500"/>
+                            <stop offset="100%" stop-color="#FFD700"/>
+                        </linearGradient>
+                    </defs>
+                    <g transform="translate(5,5)">
+                        <circle cx="45" cy="40" r="30" fill="url(#mascot-grad)"/>
+                        <path d="M25 80 C 25 60, 65 60, 65 80 Z" fill="url(#mascot-grad)"/>
+                        <circle cx="35" cy="38" r="4" fill="#2D0320"/>
+                        <circle cx="55" cy="38" r="4" fill="#2D0320"/>
+                        <path d="M38 50 Q 45 58, 52 50" stroke="#2D0320" stroke-width="2" fill="none" stroke-linecap="round"/>
+                        <rect x="55" y="60" width="30" height="20" rx="3" fill="#fff" transform="rotate(15 70 70)"/>
+                        <rect x="58" y="63" width="24" height="3" fill="#ccc"/>
+                        <rect x="58" y="69" width="24" height="3" fill="#ccc"/>
+                        <rect x="58" y="75" width="24" height="3" fill="#ccc"/>
+                    </g>
+                </svg>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-extrabold text-white">Study with Buddy</h1>
+            <p class="text-lg md:text-xl text-yellow-200">A Raksha Bandhan gift for my amazing sisters!</p>
+        </header>
+
+        <section id="input-section" class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+            <div class="flex flex-col md:flex-row gap-4">
+                <input type="text" id="question-input" class="flex-grow bg-gray-800/50 border border-yellow-800/50 text-white rounded-lg px-4 py-3 focus:ring-2 focus:ring-yellow-500 focus:outline-none transition" placeholder="Type or use voice to ask your question...">
+                
+                <button id="voice-btn" type="button" class="w-full md:w-auto bg-yellow-900/50 hover:bg-yellow-800/50 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center gap-2">
+                    <svg id="mic-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z"/>
+                        <path d="M10 8a2 2 0 1 1-4 0V3a2 2 0 1 1 4 0v5zM8 0a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V3a3 3 0 0 0-3-3z"/>
+                    </svg>
+                    <span id="voice-btn-text">Use Voice</span>
+                </button>
+
+                <div class="file-upload-wrapper">
+                    <button type="button" class="file-upload-label w-full md:w-auto bg-yellow-900/50 hover:bg-yellow-800/50 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                           <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                           <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
+                        </svg>
+                        Upload Pic
+                    </button>
+                    <input type="file" id="image-upload" accept="image/*">
+                </div>
+            </div>
+            <p id="file-name" class="text-center text-sm text-yellow-300"></p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                 <button id="submit-btn" class="btn-primary font-bold py-3 px-8 rounded-lg w-full sm:w-auto">Ask Buddy</button>
+                 <button id="clear-btn" class="bg-yellow-900/50 hover:bg-yellow-800/50 text-white font-semibold py-3 px-8 rounded-lg w-full sm:w-auto transition">Clear</button>
+            </div>
+        </section>
+
+        <div id="loader" class="hidden justify-center items-center py-8">
+            <div class="loader"></div>
+            <p class="ml-4 text-lg text-gray-300">Buddy is thinking...</p>
+        </div>
+        
+        <div id="error-box" class="hidden glass-card rounded-2xl p-6 text-center">
+            <h3 class="text-xl font-bold text-red-400 mb-2">Uh oh, something went wrong!</h3>
+            <p id="error-message" class="text-red-300"></p>
+            <button id="close-error-btn" class="mt-4 bg-red-500/50 hover:bg-red-500/70 text-white font-semibold py-2 px-6 rounded-lg transition">Try Again</button>
+        </div>
+
+        <div id="results-container" class="space-y-6">
+            <section id="answer-section" class="result-section glass-card rounded-2xl p-6 md:p-8">
+                <h2 class="text-2xl font-bold mb-4 flex items-center gap-3"><span class="text-3xl">🎯</span> Direct Answer</h2>
+                <div id="answer-content" class="prose prose-invert max-w-none text-gray-300"></div>
+            </section>
+
+            <section id="concepts-section" class="result-section glass-card rounded-2xl p-6 md:p-8">
+                <h2 class="text-2xl font-bold mb-4 flex items-center gap-3"><span class="text-3xl">💡</span> Main Concepts</h2>
+                <div id="concepts-content" class="prose prose-invert max-w-none text-gray-300"></div>
+            </section>
+
+            <section id="real-world-section" class="result-section glass-card rounded-2xl p-6 md:p-8">
+                <h2 class="text-2xl font-bold mb-4 flex items-center gap-3"><span class="text-3xl">🌍</span> Real-World Applications</h2>
+                <div id="real-world-content" class="prose prose-invert max-w-none text-gray-300"></div>
+            </section>
+
+            <section id="practice-section" class="result-section glass-card rounded-2xl p-6 md:p-8">
+                <h2 class="text-2xl font-bold mb-4 flex items-center gap-3"><span class="text-3xl">✍️</span> Practice Problems</h2>
+                <div id="practice-content" class="prose prose-invert max-w-none text-gray-300"></div>
+            </section>
+
+            <section id="exam-prep-section" class="result-section glass-card rounded-2xl p-6 md:p-8">
+                <h2 class="text-2xl font-bold mb-4 flex items-center gap-3"><span class="text-3xl">📝</span> Exam-Style Questions</h2>
+                <div id="exam-prep-content" class="prose prose-invert max-w-none text-gray-300"></div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        // DOM Elements
+        const questionInput = document.getElementById('question-input');
+        const imageUpload = document.getElementById('image-upload');
+        const fileNameDisplay = document.getElementById('file-name');
+        const submitBtn = document.getElementById('submit-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const loader = document.getElementById('loader');
+        const resultsContainer = document.getElementById('results-container');
+        const errorBox = document.getElementById('error-box');
+        const errorMessage = document.getElementById('error-message');
+        const closeErrorBtn = document.getElementById('close-error-btn');
+        const voiceBtn = document.getElementById('voice-btn');
+        const voiceBtnText = document.getElementById('voice-btn-text');
+        
+        let base64ImageData = null;
+
+        // --- NEW: Voice Recognition Logic ---
+        const originalVoiceBtnText = voiceBtnText.innerHTML;
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition;
+
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = false; // Capture a single phrase
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            // Handle the result of the speech recognition
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                questionInput.value = transcript;
+            };
+
+            // Handle errors
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                let errorMsgText = "Sorry, I couldn't understand that. Please try again.";
+                if (event.error === 'no-speech') {
+                    errorMsgText = "I didn't hear anything. Please ensure your microphone is enabled and try again.";
+                } else if (event.error === 'not-allowed') {
+                    errorMsgText = "Voice input is blocked. Please allow microphone access in your browser settings.";
+                }
+                showError(errorMsgText);
+            };
+
+            // When recognition ends, reset the button's appearance
+            recognition.onend = () => {
+                voiceBtnText.textContent = originalVoiceBtnText;
+                voiceBtn.disabled = false;
+                voiceBtn.classList.remove('bg-red-600/70', 'animate-pulse');
+                voiceBtn.classList.add('bg-yellow-900/50', 'hover:bg-yellow-800/50');
+            };
+
+            // Add click listener to the voice button to start recognition
+            voiceBtn.addEventListener('click', () => {
+                recognition.start();
+                voiceBtnText.textContent = 'Listening...';
+                voiceBtn.disabled = true;
+                voiceBtn.classList.remove('bg-yellow-900/50', 'hover:bg-yellow-800/50');
+                voiceBtn.classList.add('bg-red-600/70', 'animate-pulse');
+            });
+
+        } else {
+            // If the browser doesn't support the Speech Recognition API, hide the button.
+            console.warn("Speech Recognition API not supported in this browser.");
+            voiceBtn.style.display = 'none';
+        }
+
+        // --- Event Listeners ---
+        
+        // Handle image upload
+        imageUpload.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                fileNameDisplay.textContent = `File: ${file.name}`;
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    base64ImageData = reader.result.split(',')[1];
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Handle submit button click
+        submitBtn.addEventListener('click', () => {
+            const question = questionInput.value.trim();
+            if (!question && !base64ImageData) {
+                showError("Please type a question or upload an image first.");
+                return;
+            }
+            getBuddyResponse(question, base64ImageData);
+        });
+        
+        // Handle clear button click
+        clearBtn.addEventListener('click', () => {
+            questionInput.value = '';
+            imageUpload.value = '';
+            fileNameDisplay.textContent = '';
+            base64ImageData = null;
+            hideResults();
+            hideError();
+        });
+
+        // Handle close error button click
+        closeErrorBtn.addEventListener('click', hideError);
+
+        // --- UI Functions ---
+
+        function showLoader() {
+            loader.style.display = 'flex';
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            hideResults();
+            hideError();
+        }
+
+        function hideLoader() {
+            loader.style.display = 'none';
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorBox.style.display = 'block';
+        }
+
+        function hideError() {
+            errorBox.style.display = 'none';
+        }
+
+        function displayResults(data) {
+            const sections = {
+                'answer': document.getElementById('answer-content'),
+                'concepts': document.getElementById('concepts-content'),
+                'realWorld': document.getElementById('real-world-content'),
+                'practice': document.getElementById('practice-content'),
+                'examPrep': document.getElementById('exam-prep-content')
+            };
+
+            // Using a library like 'marked' would be better for production to safely render markdown
+            const simpleMarkdownToHtml = (text) => {
+                return text
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/`(.*?)`/g, '<code>$1</code>')
+                    .replace(/^- (.*$)/gm, '<ul><li>$1</li></ul>')
+                    .replace(/<\/ul>\n<ul>/g, '') // Join adjacent lists
+                    .replace(/\n/g, '<br>');
+            };
+
+            for (const key in sections) {
+                if (data[key] && sections[key]) {
+                    sections[key].innerHTML = simpleMarkdownToHtml(data[key]);
+                    sections[key].parentElement.classList.add('visible');
+                } else {
+                    sections[key].parentElement.classList.remove('visible');
+                }
+            }
+        }
+        
+        function hideResults() {
+             document.querySelectorAll('.result-section').forEach(section => {
+                section.classList.remove('visible');
+            });
+        }
+
+
+        // --- Gemini API Call ---
+        async function getBuddyResponse(promptText, imageData) {
+            showLoader();
+
+            const apiKey = ""; // Canvas will provide this
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=${apiKey}`;
+
+            // Construct the prompt for the AI
+            let fullPrompt = `You are "Buddy", a friendly and helpful study assistant. A student has a question. Your job is to answer it clearly and formally in five specific parts, making it easy for a school student to understand.
+            
+            Here is the user's question: "${promptText}"
+            
+            If an image is provided, analyze it as the primary source for the question.
+            
+            Provide your response in a pure JSON object format. Do not include any markdown formatting like \`\`\`json. The JSON object must have these exact keys: "answer", "concepts", "realWorld", "practice", "examPrep".
+
+            1.  **answer**: Give a direct, concise, and formal answer to the question.
+            2.  **concepts**: Explain the main concepts in a simple, clear, and formal way. Avoid slang and use easy-to-understand language suitable for a student.
+            3.  **realWorld**: Provide clear, practical real-world applications and examples.
+            4.  **practice**: Give a few other practice examples (not the original question) so the user can test their knowledge.
+            5.  **examPrep**: Create 2-3 formal, exam-style questions (like multiple choice or short answer) that are relevant to the topic.
+            `;
+
+            const contents = [{
+                parts: [{ text: fullPrompt }]
+            }];
+
+            if (imageData) {
+                contents[0].parts.push({
+                    inline_data: {
+                        mime_type: "image/png", // Assuming PNG, adjust if needed
+                        data: imageData
+                    }
+                });
+            }
+
+            const payload = {
+                contents: contents,
+                // The vision model does not currently support JSON response mode.
+                // The prompt will guide it to return a JSON string.
+            };
+            
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorBody = await response.json();
+                    throw new Error(`API Error: ${response.status} - ${errorBody.error?.message || 'Unknown error'}`);
+                }
+
+                const result = await response.json();
+                
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    
+                    // The response text is expected to be a JSON string, so we parse it.
+                    let responseText = result.candidates[0].content.parts[0].text;
+                    
+                    // Clean the response text to ensure it's valid JSON
+                    responseText = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+
+                    const parsedJson = JSON.parse(responseText);
+                    displayResults(parsedJson);
+
+                } else {
+                    throw new Error("The response from Buddy was empty or in a weird format. Maybe try again?");
+                }
+
+            } catch (error) {
+                console.error("Error fetching from Gemini:", error);
+                showError(`A network or API error occurred. Details: ${error.message}`);
+            } finally {
+                hideLoader();
+            }
+        }
+
+    </script>
+</body>
+</html>
