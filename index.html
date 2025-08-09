@@ -351,19 +351,8 @@
         async function getBuddyResponse(promptText, imageData) {
             showLoader();
 
-           // safer client code — no key in the browser
-const apiUrl = '/api/generate';
-const payload = { prompt: fullPrompt };
-if (imageData) payload.imageData = imageData;
-
-const response = await fetch(apiUrl, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(payload)
-});
-
-const result = await response.json();
-// result is the same JSON that Gemini returned; your existing parsing logic should work
+            const apiKey = ""; // Canvas will provide this
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=${apiKey}`;
 
             // Construct the prompt for the AI
             let fullPrompt = `You are "Buddy", a friendly and helpful study assistant. A student has a question. Your job is to answer it clearly and formally in five specific parts, making it easy for a school student to understand.
@@ -442,4 +431,3 @@ const result = await response.json();
     </script>
 </body>
 </html>
-
